@@ -19,56 +19,59 @@ clear all;
 %Load Grain File
 grainfilename = uigetfile({'*.txt'},'Select Grain File');
 grainfile = dlmread(grainfilename);
-[grainsizeRows, grainsizeCols] = size(grainfile);
+[grainfilesizeRows, grainfilesizeCols] = size(grainfile);
 
 %Load TF Map File
 MapFilename = uigetfile({'*.txt'},'Select Taylor Factor Map File');
-mapfile = dlmread(MapFilename);
-[mapsizeRows, mapsizeCols] = size(mapfile);
+TFmapfile = dlmread(MapFilename);
+[TFmapsizeRows, TFmapsizeCols] = size(TFmapfile);
 
 %Loop through the grain file to get the coordinates needed and then find
 %those coordinates in the map file and assign the TF vector as such
-for i=1:grainsizeRows
+for i=1:grainfilesizeRows
     Xpos = grainfile(i,5); %x-position of the grain 
     Ypos = grainfile(i,6); %y-position of the grain
-    for j = 1:mapsizeRows
+    for j = 1:TFmapsizeRows
         
         %Need to make ranges on the variation of Xpos and Ypos of 1/2 the
         %step size in um since the map coordinates are by each point (so by
         %the step size) but the grain file coordinates are not on the same
         %step size, they are custom to position but fall in the correct
         %range...
-        if  (mapfile(j,1)-.04) <= Xpos && Xpos <= (mapfile(j,1)+.04) && (mapfile(j,2)-.04) <= Ypos && Ypos <= (mapfile(j,2)+.04) 
-            if mapfile(j,3) ~= -1
-                TFgrainfile(i) = mapfile(j,3);
+        stepsize = .08; %in um
+        range = .5*stepsize;
+        if  (TFmapfile(j,1)-range) <= Xpos && Xpos <= (TFmapfile(j,1)+range) && (TFmapfile(j,2)-range) <= Ypos && Ypos <= (TFmapfile(j,2)+range) 
+            if TFmapfile(j,3) ~= -1
+                TFgrainfile(i) = TFmapfile(j,3);
             else
-                TFgrainfile(i) = mapfile(j,4);
+                TFgrainfile(i) = TFmapfile(j,4);
             end
         end
     end
 end
 
-%Append the grainfile to add on the TFgrainfile
-grainfile(:,grainsizeCols+1) = TFgrainfile(1,:);
+%Append the grainfile to add on the TFgrainfile at end
+grainfile(:,grainfilesizeCols+1) = TFgrainfile(1,:);
 
-%Create Variable Names
-ID = grainfile(:,1);
+%Create Variable Names from grainfile
+ID = grainfile(:,1);    %Grain ID number
 phi1 = grainfile(:,2);  %in deg
 PHI = grainfile(:,3);   %in deg
 phi2 = grainfile(:,4);  %in deg
 Xposition = grainfile(:,5); %in microns
 Yposition = grainfile(:,6); %in microns
-IQ = grainfile(:,7);
+IQ = grainfile(:,7);    %IQ number
 Phase = grainfile(:,8); %1-Austenite; 2-Ferrite
 Area = grainfile(:,9);  %in microns
 Diameter = grainfile(:,10); %in mircons
-GSAR = grainfile(:,11);
-MAO = grainfile(:,12);  %in degrees
-NumNeighbor = grainfile(:,13);
+GSAR = grainfile(:,11); %Grain Shape Aspect Ratio
+MAO = grainfile(:,12);  %Major Axis Orientation in degrees
+NumNeighbor = grainfile(:,13); %Number of neighbors
 
-%Extract given data for austenite grains
+%Extract given data for only austenite grains
 index = 1;
-for i=1:grainsizeRows
+for i=1:grainfilesizeRows
+    %The phase number will depend on the grain file, Austenite may be 2
     if Phase(i) == 1
         RAgrainLocation(index) = i;
         index = index+1;
@@ -77,35 +80,34 @@ end
 numRAgrains = length(RAgrainLocation);%defines the number of RA grains identified
 
 %Create a grain file for only the austenite grains
-for j = 1:numRAgrains
-    RAGrainFileALL(j,:) = grainfile(RAgrainLocation(j),:);
+for i = 1:numRAgrains
+    RAGrainFileALL(i,:) = grainfile(RAgrainLocation(i),:);
 end
 
 for k=1:numRAgrains 
-    RAGrainFile(k,1) = grainfile(RAgrainLocation(k),1);  %ID
-    RAGrainFile(k,2) = grainfile(RAgrainLocation(k),2);  %phi1
-    RAGrainFile(k,3) = grainfile(RAgrainLocation(k),3);  %PHI
-    RAGrainFile(k,4) = grainfile(RAgrainLocation(k),4);  %phi2
-    RAGrainFile(k,5) = grainfile(RAgrainLocation(k),5);  %X position
-    RAGrainFile(k,6) = grainfile(RAgrainLocation(k),6);  %Y position
-    RAGrainFile(k,7) = grainfile(RAgrainLocation(k),9);  %Area    
-    RAGrainFile(k,8) = grainfile(RAgrainLocation(k),10); %Diameter    
-    RAGrainFile(k,9) = grainfile(RAgrainLocation(k),11); %GSAR    
-    RAGrainFile(k,10) = grainfile(RAgrainLocation(k),12); %MAO    
-    RAGrainFile(k,11) = grainfile(RAgrainLocation(k),13); %NumNeighbor
-    RAGrainFile(k,12) = grainfile(RAgrainLocation(k),grainsizeCols+1); %TF
+    RAGrainFileCustom(k,1) = grainfile(RAgrainLocation(k),1);  %ID
+    RAGrainFileCustom(k,2) = grainfile(RAgrainLocation(k),2);  %phi1
+    RAGrainFileCustom(k,3) = grainfile(RAgrainLocation(k),3);  %PHI
+    RAGrainFileCustom(k,4) = grainfile(RAgrainLocation(k),4);  %phi2
+    RAGrainFileCustom(k,5) = grainfile(RAgrainLocation(k),5);  %X position
+    RAGrainFileCustom(k,6) = grainfile(RAgrainLocation(k),6);  %Y position
+    RAGrainFileCustom(k,7) = grainfile(RAgrainLocation(k),9);  %Area    
+    RAGrainFileCustom(k,8) = grainfile(RAgrainLocation(k),10); %Diameter    
+    RAGrainFileCustom(k,9) = grainfile(RAgrainLocation(k),11); %GSAR    
+    RAGrainFileCustom(k,10) = grainfile(RAgrainLocation(k),12); %MAO    
+    RAGrainFileCustom(k,11) = grainfile(RAgrainLocation(k),13); %NumNeighbor
+    RAGrainFileCustom(k,12) = grainfile(RAgrainLocation(k),grainfilesizeCols+1); %TF
 end
 
 %Changed from m-2 to m-1 when I added TF value 10/27/17
-for m=14:grainsizeCols
-    RAGrainFile(:,m-1) = RAGrainFileALL(:,m); %Add the neighbor IDs to end
+%14 is the column that neighbor ID's begin at in the original grainfile.
+%This adds the neighbor ID values to the end of the RAgrainfilecustom
+for m=14:grainfilesizeCols
+    RAGrainFileCustom(:,m-1) = RAGrainFileALL(:,m); %Add the neighbor IDs to end
 end
 
-[numRARows, numRACols] = size(RAGrainFile);
-
-%Call Function to compute SCHMID FACTOR for RA
-RASchmidFactor = RA_SF_calculator(numRAgrains, RAGrainFile);
-
+%Call Function to compute SCHMID FACTOR for RA grains
+RASchmidFactor = RA_SF_calculator(numRAgrains, RAGrainFileCustom);
 
 
 %% IQ Cutoff GUI Creation
@@ -117,7 +119,7 @@ x = (max(IQ)-min(IQ))/2; %Default IQ cutoff
 IQmin = num2str(min(IQ));
 IQmax = num2str(max(IQ));
 
-displaysuggestions = {'Please input the desired IQ cutoff value to distinguish Martensite from Ferrite, where phases identified by OIM with an IQ higher than the input value will be identified as Ferrite and those lower than the input value will be identified as Martensite. There is not a hard cutoff value as IQ values may change from one scan to the next, but for more recent scans, an IQ cutoff value around 2e6 - 2.5e6 seems reasonable.'};
+displaysuggestions = {'Please input the desired IQ cutoff value to distinguish Martensite from Ferrite, where phases identified by OIM with an IQ higher than the input value will be identified as Ferrite and those lower than the input value will be identified as Martensite. There is not a hard cutoff value as IQ values may change from one scan to the next.'};
 uilegend = uicontrol('Style','Text');
 set(uilegend, 'string', displaysuggestions, 'Position', [25 70 425 75]);
 
@@ -141,113 +143,144 @@ if (results == 1)
 end
 %% RA Grain Neighbor Analysis
 %Determine the phases around the RA grain by identifying the surrounding
-%grains and their IQ values. Also, calculate their Schmid Factor.
+%grains and their IQ values. Also, calculate their Schmid Factor and Taylor Factors.
 
 %1 Austenite; 2-Ferrite; 3-Martensite
 
-RANumNeighbor = RAGrainFile(:,11);
+%Create an array of only the column that holds the number of neighbors for
+%RA grains
+RANumNeighbor = RAGrainFileCustom(:,11);
 
 for n=1:length(RANumNeighbor)
+    %Check to see if the RA grain is reported to have 0 neighbors or not.
+    %If it has more than 0 neighbors then analyze those neighbors,
+    %otherwise set all of the neighbor information to 0 (see else if below)
     if RANumNeighbor(n) ~= 0 
+        
+        %Variable for loop, will loop through the number of times equal to
+        %the number of neighbors the RA grain has.
         for p=1:RANumNeighbor(n)
-            %changed 11+p to 12+p to accomodate TF being added on
-            RANeighbor(n,p) = RAGrainFile(n,12+p);
+            %Build a matrix to hold the ID values of the neighboring
+            %grains. 12 is the last column number, it hold the TF values,
+            %and 13 on hold the neighbor ID values.
+            RANeighborID(n,p) = RAGrainFileCustom(n,12+p);
+            
+            %Loop through the grainfile to find the corresponding ID values
+            %and get the info necessary from them.
             for q=1:length(grainfile)
-                if RANeighbor(n,p) == ID(q)
-                   RANeighborInitialPhase(n,p) = Phase(q);
+                if RANeighborID(n,p) == ID(q)
                    
+                   %Create matrix of initial phase values only according to
+                   %the phases scanned for (in our case 1-austenite,
+                   %2-ferrite)
+                   RANeighborGrainFilePhase(n,p) = Phase(q);
                    
-                   if RANeighborInitialPhase(n,p) == 1
+                   %Calculate the SF value based on what phase is reported
+                   if RANeighborGrainFilePhase(n,p) == 1
                        RANeighborPhaseSchmid(n,p) = RA_SF_calculator(1,grainfile(q,:));
                    else
                        RANeighborPhaseSchmid(n,p) = Ferrite_SF_calculator(grainfile(q,:));
                    end
-                   NeighborArea(n,p) = Area(q);
+                   
+                   %Store the values of the area of each neighbor grain
+                   %reported to be surrounding the RA grain
+                   RANeighborGrainArea(n,p) = Area(q);
                    
                    %IF loops to separate the phases based on IQ and Schmid
-                   %Factor
+                   %Factor (Used to use SF to create cutoff between hard
+                   %and soft phase, doesn't do that but can be modified to
+                   %do so)
                    if Phase(q) == 1 && RANeighborPhaseSchmid(n,p) > .45
-                       RANeighborPhase(n,p) = 1; %Soft Austenite
+                       RANeighborPhase(n,p) = 1; %Austenite
                    end
                    if Phase(q) == 1 && RANeighborPhaseSchmid(n,p) <= .45
-                       RANeighborPhase(n,p) = 1; %Hard Austenite
+                       RANeighborPhase(n,p) = 1; %Austenite
                    end
                    if Phase(q) == 2 && IQ(q)> MFcutoff && RANeighborPhaseSchmid(n,p) > .45
-                       RANeighborPhase(n,p) = 2; %Soft Ferrite
+                       RANeighborPhase(n,p) = 2; %Ferrite
                    end
                    if Phase(q) == 2 && IQ(q)> MFcutoff && RANeighborPhaseSchmid(n,p) <= .45
-                       RANeighborPhase(n,p) = 2; %Hard Austenite
+                       RANeighborPhase(n,p) = 2; %Ferrite
                    end
                    if Phase(q) == 2 && IQ(q)<= MFcutoff && RANeighborPhaseSchmid(n,p) > .45
-                       RANeighborPhase(n,p) = 3; %Soft Martensite
+                       RANeighborPhase(n,p) = 3; %Martensite
                    end
                    if Phase(q) == 2 && IQ(q)<= MFcutoff && RANeighborPhaseSchmid(n,p) <= .45
-                       RANeighborPhase(n,p) = 3; %Hard Martensite
+                       RANeighborPhase(n,p) = 3; %Martensite
                    end
                   
                 end
             end
         end
     else
+        %Set neighbor properties of RA grains reported to have 0 neighbors
+        %to all 0's. Helps maintain the correct number of RA grains.
        for p=1:1
-            RANeighbor(n,p) = RAGrainFile(n,12+p);
-            RANeighborInitialPhase(n,p) = 0;   
+            RANeighborID(n,p) = RAGrainFileCustom(n,12+p);
+            RANeighborGrainFilePhase(n,p) = 0;   
             RANeighborPhase(n,p) = 0;
             RANeighborPhaseSchmid(n,p) = 0;
        end
     end
 end
 %% Neighbor Grain Sorter and Size Determiner/Locator
-RAx = RAGrainFile(:,5);
-RAy = RAGrainFile(:,6);
-[row, col] = size(NeighborArea);
+
+[RANeighborGrainArea_Row, RANeighborGrainArea_Col] = size(RANeighborGrainArea);
 
 %Use the sort function to arrange the areas in descending order of size.
-NeighborArea = sort(NeighborArea,2,'descend');
+RANeighborGrainArea = sort(RANeighborGrainArea,2,'descend');
 
 %For Loop to create vectors for the total size of surrounding neighbors and
 %approximate 'common boundary' between the grain and the RA grain
-for i=1:row
-    NeighborTotalArea = 0;
+for i=1:RANeighborGrainArea_Row
+    %Variable to hold the total area of the 6 largest grains surrounding
+    %the RA grain
+    RATotalNeighborArea = 0;
+    
     %For loop to calculate the total area of only the 6 largest surrounding
     %grains. If you want to look at more, change the bound on j to a larger
     %number.
-    for j=1:col
-        if j<=col && j<=6
-            NeighborTotalArea = NeighborTotalArea + NeighborArea(i,j);
+    for j=1:RANeighborGrainArea_Col
+        if j<=RANeighborGrainArea_Col && j<=6
+            RATotalNeighborArea = RATotalNeighborArea + RANeighborGrainArea(i,j);
         else 
             break
         end
     end
-    GrainNeighborArea(i) = NeighborTotalArea;
+    
+    
+    RAGrainTotalNeighborArea(i) = RATotalNeighborArea;
     
     %For loop to calculate the % of each surrounding grain to provide an
     %estimate of how much each grain surrounds the RA grain.
-    for k=1:col
-        if k<=col && k<=6
-            NeighborPercentSurrounding(i,k) = NeighborArea(i,k)/GrainNeighborArea(i);
+    for k=1:RANeighborGrainArea_Col
+        if k<=RANeighborGrainArea_Col && k<=6
+            NeighborPercentSurrounding(i,k) = RANeighborGrainArea(i,k)/RAGrainTotalNeighborArea(i);
         else
             break
         end
     end
-    %NeighborPercentSurrounding = NeighborArea(i,j)/NeighborTotalArea;
 end
 
+%Neighbor Grain Locator
+%Initialize a matrix to hold the values of the sorted ID values
+RANeighborIDsSorted = zeros(RANeighborGrainArea_Row,RANeighborGrainArea_Col);
 
-
-% Neighbor Grain Locator
-
-RANeighborIndiceSorted = zeros(row,col);
-
-for i=1:row
-    for j=1:col
-        for k=1:col
-            if RANeighbor(i,k) ~=0
-                 if NeighborArea(i,j) == grainfile(RANeighbor(i,k),9)
+for i=1:RANeighborGrainArea_Row
+    for j=1:RANeighborGrainArea_Col
+        for k=1:RANeighborGrainArea_Col
+            
+            %Check to see if the ID is 0, meaning that it has no neighbors
+            if RANeighborID(i,k) ~=0
+                
+                 %Loop through the grainfile to find the grain with the
+                 %matching area value
+                 if RANeighborGrainArea(i,j) == grainfile(RANeighborID(i,k),9)
                      
-                     for m=1:col
-                         if RANeighbor(i,m) ~=0;
-                            if RANeighborIndiceSorted(i,m) == RANeighbor(i,k)
+                     %Check for duplicate grains being reported
+                     for m=1:RANeighborGrainArea_Col
+                         if RANeighborID(i,m) ~=0;
+                            if RANeighborIDsSorted(i,m) == RANeighborID(i,k)
                                  duplicate = 0;
                                  break
                             else
@@ -259,7 +292,7 @@ for i=1:row
                      if duplicate == 0
                          break
                      else
-                         RANeighborIndiceSorted(i,j) = RANeighbor(i,k);
+                         RANeighborIDsSorted(i,j) = RANeighborID(i,k);
                          RANeighborPhaseSorted(i,j) = RANeighborPhase(i,k);
                      end      
                  end
@@ -268,13 +301,14 @@ for i=1:row
     end
 end
 
-
-for i=1:row
-    for j=1:col
-        if j<=col && j<=6
-            if RANeighborIndiceSorted(i,j) ~= 0
-                NeighborPositionX(i,j) = Xposition(RANeighborIndiceSorted(i,j));
-                NeighborPositionY(i,j) = Yposition(RANeighborIndiceSorted(i,j));
+%Create matrices that hold the x and y positions of the center of the
+%neighboring grains
+for i=1:RANeighborGrainArea_Row
+    for j=1:RANeighborGrainArea_Col
+        if j<=RANeighborGrainArea_Col && j<=6
+            if RANeighborIDsSorted(i,j) ~= 0
+                NeighborPositionX(i,j) = Xposition(RANeighborIDsSorted(i,j));
+                NeighborPositionY(i,j) = Yposition(RANeighborIDsSorted(i,j));
             end
         else
             break
@@ -286,12 +320,12 @@ end
 %Identify the phase associated with each number in
 %NeighborPercentSurrounding, add all of the common phases numbers, then add
 %columns into the output file accordingly
-SurroundingRApercent = zeros(row,1);
-SurroundingFerritePercent = zeros(row,1);
-SurroundingMartPercent = zeros(row,1);
-for i=1:row
-    for k=1:col
-        if k<=col && k<=6
+SurroundingRApercent = zeros(RANeighborGrainArea_Row,1);
+SurroundingFerritePercent = zeros(RANeighborGrainArea_Row,1);
+SurroundingMartPercent = zeros(RANeighborGrainArea_Row,1);
+for i=1:RANeighborGrainArea_Row
+    for k=1:RANeighborGrainArea_Col
+        if k<=RANeighborGrainArea_Col && k<=6
             if RANeighborPhaseSorted(i,k) == 1 
                 SurroundingRApercent(i) = NeighborPercentSurrounding(i,k) + SurroundingRApercent(i);
             end
@@ -313,16 +347,19 @@ end
 %4-Left    GRAIN       5-Right
 %6-Bot. Left   7-Bot.  8-Bot. Right
 %9-RA grain is surrounded by that grain
-for i=1:row
-    for j=1:col
-        if j<=col && j<=6
-        %The percent value can be changed to provide different location
-        %results based on how you'd like to do it. 
+for i=1:RANeighborGrainArea_Row
+    for j=1:RANeighborGrainArea_Col
+        if j<=RANeighborGrainArea_Col && j<=6
+            
+        %Percent is a fraction of the RA grains diameter. This means that each
+        %grain will have different size sectors and it can be changed to
+        %provide different location results based on how you'd like to do it. 
+        percent = RAGrainFileCustom(i,8)*.25;
         
-        percent = RAGrainFile(i,8)*.25;
-        %percent = .1;
-        diffX = NeighborPositionX(i,j)-RAGrainFile(i,5);
-        diffY = NeighborPositionY(i,j)-RAGrainFile(i,6);
+        %Difference between the x and y positions of the center of the
+        %neighbor and the center of the RA grain
+        diffX = NeighborPositionX(i,j)-RAGrainFileCustom(i,5);
+        diffY = NeighborPositionY(i,j)-RAGrainFileCustom(i,6);
             if NeighborPositionX(i,j) ~=0
                  if diffX < (-1*percent) && diffY < (-1*percent)
                       NeighborLocation(i,j) = 1;
@@ -348,7 +385,7 @@ for i=1:row
                  if diffX > percent && diffY > percent
                       NeighborLocation(i,j) = 8;
                  end
-                 if RAGrainFile(i,11) == 1
+                 if RAGrainFileCustom(i,11) == 1
                      NeighborLocation(i,j) = 9;
                  end
             end
@@ -360,17 +397,18 @@ end
 %% Populate the Area Sector vectors
 %Using the neighbor location combined with the neighbor phase sorted
 %values, populate the vectors to be added into the file RA grain file
-Sector1 = zeros(row,1);
-Sector2 = zeros(row,1);
-Sector3 = zeros(row,1);
-Sector4 = zeros(row,1);
-Sector5 = zeros(row,1);
-Sector6 = zeros(row,1);
-Sector7 = zeros(row,1);
-Sector8 = zeros(row,1);
-for i=1:row
-    for j=1:col
-        if j<=col && j<=6
+Sector1 = zeros(RANeighborGrainArea_Row,1);
+Sector2 = zeros(RANeighborGrainArea_Row,1);
+Sector3 = zeros(RANeighborGrainArea_Row,1);
+Sector4 = zeros(RANeighborGrainArea_Row,1);
+Sector5 = zeros(RANeighborGrainArea_Row,1);
+Sector6 = zeros(RANeighborGrainArea_Row,1);
+Sector7 = zeros(RANeighborGrainArea_Row,1);
+Sector8 = zeros(RANeighborGrainArea_Row,1);
+
+for i=1:RANeighborGrainArea_Row
+    for j=1:RANeighborGrainArea_Col
+        if j<=RANeighborGrainArea_Col && j<=6
             location = NeighborLocation(i,j);
             switch location
                 %The 'if' statements inside the cases are for the times
@@ -428,7 +466,7 @@ end
 %% Blank Sector Filler
 %Fill in the blank sector spaces with the phase of the largest neighboring
 %sector
-for i=1:row
+for i=1:RANeighborGrainArea_Row
     %Make them all 0 for each RA grain so it doesn't carry on to the next
     %loop
     size1 = 0;
@@ -440,8 +478,8 @@ for i=1:row
     size7 = 0;
     size8 = 0;
     
-    for j=1:col
-        if j<=col && j<=6
+    for j=1:RANeighborGrainArea_Col
+        if j<=RANeighborGrainArea_Col && j<=6
             location = NeighborLocation(i,j);
             
             switch location
@@ -452,35 +490,35 @@ for i=1:row
                 %largest to maintain correct representation.
                 case 1
                     if size1 == 0
-                    size1 = NeighborArea(i,j);
+                    size1 = RANeighborGrainArea(i,j);
                     end
                 case 2
                     if size2 == 0
-                    size2 = NeighborArea(i,j);
+                    size2 = RANeighborGrainArea(i,j);
                     end
                 case 3
                     if size3 == 0
-                    size3 = NeighborArea(i,j);
+                    size3 = RANeighborGrainArea(i,j);
                     end
                 case 4
                     if size4 == 0
-                    size4 = NeighborArea(i,j);
+                    size4 = RANeighborGrainArea(i,j);
                     end
                 case 5
                     if size5 == 0
-                    size5 = NeighborArea(i,j);
+                    size5 = RANeighborGrainArea(i,j);
                     end
                 case 6
                     if size6 == 0
-                    size6 = NeighborArea(i,j);
+                    size6 = RANeighborGrainArea(i,j);
                     end
                 case 7
                     if size7 == 0
-                    size7 = NeighborArea(i,j);
+                    size7 = RANeighborGrainArea(i,j);
                     end
                 case 8
                     if size8 == 0
-                    size8 = NeighborArea(i,j);
+                    size8 = RANeighborGrainArea(i,j);
                     end
             end
         end 
@@ -738,7 +776,7 @@ for q=1:numRAgrains
     FinalRAFile(q,4) = grainfile(RAgrainLocation(q),11); %GSAR
     FinalRAFile(q,5) = grainfile(RAgrainLocation(q),12); %MAO
     FinalRAFile(q,6) = RASchmidFactor(q);                %RA Schmid Factor
-    FinalRAFile(q,7) = grainfile(RAgrainLocation(q),grainsizeCols+1); %TF
+    FinalRAFile(q,7) = grainfile(RAgrainLocation(q),grainfilesizeCols+1); %RA Taylor Factor
     FinalRAFile(q,8) = grainfile(RAgrainLocation(q),13); %NumNeighbor
     FinalRAFile(q,9) = Sector1(q);
     FinalRAFile(q,10) = Sector2(q);
@@ -756,21 +794,23 @@ end
 
 Headers = {'GrainID', 'Area', 'Diameter', 'GSAR', 'MAO', 'Schmid_Factor','Taylor_Factor', 'Num_Neighbors','Sector_1','Sector_2','Sector_3','Sector_4','Sector_5','Sector_6','Sector_7','Sector_8', 'Surrounding_Ferrite', 'Surrounding_Martensite','Surrounding_RA'};
 
+%Create a table with the FinalRAFile info that has headers to describe
+%column data.
 T = array2table(FinalRAFile,'VariableNames',Headers);
-toDelete = T.Num_Neighbors<1; %Delete all rows (or RA grains) that have 0 neighbors, meaning they're on the edge of the scan or
+
+%Delete all rows (or RA grains) that have 0 neighbors
+toDelete = T.Num_Neighbors<1; 
 T(toDelete,:) = [];
 
 %Create CSV file for RA data by prompting user for filename. File will be
-%saved in RA Grain Analysis folder regardless of the path created when
+%saved in the folder where this script is located regardless of the path created when
 %making the filename.
 savequery = menu('Save to a CSV File?', 'Yes','No');
 if (savequery == 1)
    [filename,path] = uiputfile('*.csv','Save File As');
     writetable(T, filename);
 end
-%% Clear Useless Variables at end of file
-clear cnames displaymax displaymin displaysuggestions f filename Headers i index j k m minlegend  neighborCols neighborRows numRARows numRACols numRAgrains
-clear  path q r results sizeCols sizeRows t uilegend x row col n p
+
 
 
     
