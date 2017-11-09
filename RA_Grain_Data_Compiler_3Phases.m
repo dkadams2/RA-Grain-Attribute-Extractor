@@ -175,6 +175,9 @@ for n=1:length(RANumNeighbor)
                    %2-ferrite)
                    RANeighborGrainFilePhase(n,p) = Phase(q);
                    
+                   %Create a matrix of TF values for neighboring grains
+                   RANeighborTF(n,p) = grainfile(q,grainfilesizeCols+1);
+                   
                    %Calculate the SF value based on what phase is reported
                    if RANeighborGrainFilePhase(n,p) == 1
                        RANeighborPhaseSchmid(n,p) = RA_SF_calculator(1,grainfile(q,:));
@@ -294,6 +297,7 @@ for i=1:RANeighborGrainArea_Row
                      else
                          RANeighborIDsSorted(i,j) = RANeighborID(i,k);
                          RANeighborPhaseSorted(i,j) = RANeighborPhase(i,k);
+                         RANeighborTFSorted(i,j) = RANeighborTF(i,k);
                      end      
                  end
             end
@@ -397,14 +401,22 @@ end
 %% Populate the Area Sector vectors
 %Using the neighbor location combined with the neighbor phase sorted
 %values, populate the vectors to be added into the file RA grain file
-Sector1 = zeros(RANeighborGrainArea_Row,1);
-Sector2 = zeros(RANeighborGrainArea_Row,1);
-Sector3 = zeros(RANeighborGrainArea_Row,1);
-Sector4 = zeros(RANeighborGrainArea_Row,1);
-Sector5 = zeros(RANeighborGrainArea_Row,1);
-Sector6 = zeros(RANeighborGrainArea_Row,1);
-Sector7 = zeros(RANeighborGrainArea_Row,1);
-Sector8 = zeros(RANeighborGrainArea_Row,1);
+Sector1_Phase = zeros(RANeighborGrainArea_Row,1);
+Sector2_Phase = zeros(RANeighborGrainArea_Row,1);
+Sector3_Phase = zeros(RANeighborGrainArea_Row,1);
+Sector4_Phase = zeros(RANeighborGrainArea_Row,1);
+Sector5_Phase = zeros(RANeighborGrainArea_Row,1);
+Sector6_Phase = zeros(RANeighborGrainArea_Row,1);
+Sector7_Phase = zeros(RANeighborGrainArea_Row,1);
+Sector8_Phase = zeros(RANeighborGrainArea_Row,1);
+Sector1_TF = zeros(RANeighborGrainArea_Row,1);
+Sector2_TF = zeros(RANeighborGrainArea_Row,1);
+Sector3_TF = zeros(RANeighborGrainArea_Row,1);
+Sector4_TF = zeros(RANeighborGrainArea_Row,1);
+Sector5_TF = zeros(RANeighborGrainArea_Row,1);
+Sector6_TF = zeros(RANeighborGrainArea_Row,1);
+Sector7_TF = zeros(RANeighborGrainArea_Row,1);
+Sector8_TF = zeros(RANeighborGrainArea_Row,1);
 
 for i=1:RANeighborGrainArea_Row
     for j=1:RANeighborGrainArea_Col
@@ -417,46 +429,65 @@ for i=1:RANeighborGrainArea_Row
                 %correspond to the smallest grain, but it needs to be the
                 %largest to maintain correct representation.
                 case 1
-                   if Sector1(i) == 0
-                    Sector1(i) = RANeighborPhaseSorted(i,j);
+                   if Sector1_Phase(i) == 0
+                    Sector1_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector1_TF(i) = RANeighborTFSorted(i,j);
                    end                     
                 case 2
-                    if Sector2(i) == 0
-                    Sector2(i) = RANeighborPhaseSorted(i,j);
+                    if Sector2_Phase(i) == 0
+                    Sector2_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector2_TF(i) = RANeighborTFSorted(i,j);
                     end
                 case 3
-                    if Sector3(i) == 0
-                    Sector3(i) = RANeighborPhaseSorted(i,j);
+                    if Sector3_Phase(i) == 0
+                    Sector3_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector3_TF(i) = RANeighborTFSorted(i,j);
                     end
                 case 4
-                    if Sector4(i) == 0
-                    Sector4(i) = RANeighborPhaseSorted(i,j);
+                    if Sector4_Phase(i) == 0
+                    Sector4_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector4_TF(i) = RANeighborTFSorted(i,j);
                     end
                 case 5
-                    if Sector5(i) == 0
-                    Sector5(i) = RANeighborPhaseSorted(i,j);
+                    if Sector5_Phase(i) == 0
+                    Sector5_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector5_TF(i) = RANeighborTFSorted(i,j);
                     end
                 case 6
-                    if Sector6(i) == 0
-                    Sector6(i) = RANeighborPhaseSorted(i,j);
+                    if Sector6_Phase(i) == 0
+                    Sector6_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector6_TF(i) = RANeighborTFSorted(i,j);
                     end
                 case 7
-                    if Sector7(i) == 0
-                    Sector7(i) = RANeighborPhaseSorted(i,j);
+                    if Sector7_Phase(i) == 0
+                    Sector7_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector7_TF(i) = RANeighborTFSorted(i,j);
                     end
                 case 8
-                    if Sector8(i) == 0
-                    Sector8(i) = RANeighborPhaseSorted(i,j);
+                    if Sector8_Phase(i) == 0
+                    Sector8_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector8_TF(i) = RANeighborTFSorted(i,j);
                     end
                 case 9
-                    Sector1(i) = RANeighborPhaseSorted(i,j);
-                    Sector2(i) = RANeighborPhaseSorted(i,j);
-                    Sector3(i) = RANeighborPhaseSorted(i,j);
-                    Sector4(i) = RANeighborPhaseSorted(i,j);
-                    Sector5(i) = RANeighborPhaseSorted(i,j);
-                    Sector6(i) = RANeighborPhaseSorted(i,j);
-                    Sector7(i) = RANeighborPhaseSorted(i,j);
-                    Sector8(i) = RANeighborPhaseSorted(i,j);
+                    %Case 9 says that the grain is surrounded by its
+                    %neighbor, so assign all sectors to the same phase and
+                    %TF value.
+                    Sector1_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector2_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector3_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector4_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector5_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector6_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector7_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector8_Phase(i) = RANeighborPhaseSorted(i,j);
+                    Sector1_TF(i) = RANeighborTFSorted(i,j);
+                    Sector2_TF(i) = RANeighborTFSorted(i,j);
+                    Sector3_TF(i) = RANeighborTFSorted(i,j);
+                    Sector4_TF(i) = RANeighborTFSorted(i,j);
+                    Sector5_TF(i) = RANeighborTFSorted(i,j);
+                    Sector6_TF(i) = RANeighborTFSorted(i,j);
+                    Sector7_TF(i) = RANeighborTFSorted(i,j);
+                    Sector8_TF(i) = RANeighborTFSorted(i,j);
             end           
          else
             break
@@ -529,239 +560,295 @@ for i=1:RANeighborGrainArea_Row
     %neighboring sectors and assign the phase of the larger of the two. If
     %those are both empty it will move on to the next two sectors and so on
     %until it finds a phase. 
-     if Sector1(i) == 0
+     if Sector1_Phase(i) == 0
          if size2 ~=0 || size4 ~=0
              if size2 > size4 
-                 Sector1(i) = Sector2(i);
+                 Sector1_Phase(i) = Sector2_Phase(i);
+                 Sector1_TF(i) = Sector2_TF(i);
              else
-                 Sector1(i) = Sector4(i);
+                 Sector1_Phase(i) = Sector4_Phase(i);
+                 Sector1_TF(i) = Sector4_TF(i);
              end
          end
-             if Sector1(i) == 0 
+             if Sector1_Phase(i) == 0 
                  if size3 ~=0 || size6 ~=0
                     if size6 > size3 
-                        Sector1(i) = Sector6(i);
+                        Sector1_Phase(i) = Sector6_Phase(i);
+                        Sector1_TF(i) = Sector6_TF(i);
                     else
-                        Sector1(i) = Sector3(i);
+                        Sector1_Phase(i) = Sector3_Phase(i);
+                        Sector1_TF(i) = Sector3_TF(i);
                     end
                  end
-              if Sector1(i) == 0 
+              if Sector1_Phase(i) == 0 
                         if size3 ~=7 || size5 ~=0
                             if size7 > size5
-                                Sector1(i) = Sector7(i);
+                                Sector1_Phase(i) = Sector7_Phase(i);
+                                Sector1_TF(i) = Sector7_TF(i);
                             else
-                                Sector1(i) = Sector5(i);
+                                Sector1_Phase(i) = Sector5_Phase(i);
+                                Sector1_TF(i) = Sector5_TF(i);
                             end
                         else
-                            Sector1(i) = Sector8(i);
+                            Sector1_Phase(i) = Sector8_Phase(i);
+                            Sector1_TF(i) = Sector8_TF(i);
                         end
                end
              end
      end
-      if Sector2(i) == 0
+      if Sector2_Phase(i) == 0
           if size3 ~=0 || size1 ~=0
              if size3 > size1  
-                 Sector2(i) = Sector3(i);
+                 Sector2_Phase(i) = Sector3_Phase(i);
+                 Sector2_TF(i) = Sector3_TF(i);
              else
-                 Sector2(i) = Sector1(i);
+                 Sector2_Phase(i) = Sector1_Phase(i);
+                 Sector2_TF(i) = Sector1_TF(i);
              end
           end
-             if Sector2(i) == 0
+             if Sector2_Phase(i) == 0
                  if size4 ~=0 || size5 ~=0
                         if size4 > size5 
-                            Sector2(i) = Sector4(i);
+                            Sector2_Phase(i) = Sector4_Phase(i);
+                            Sector2_TF(i) = Sector4_TF(i);
                         else
-                            Sector2(i) = Sector5(i);
+                            Sector2_Phase(i) = Sector5_Phase(i);
+                            Sector2_TF(i) = Sector5_TF(i);
                         end
                  end
-                 if Sector2(i) == 0
+                 if Sector2_Phase(i) == 0
                         if size6 ~=0 || size8 ~=0
                          
                             if size6 > size8
-                                Sector2(i) = Sector6(i);
+                                Sector2_Phase(i) = Sector6_Phase(i);
+                                Sector2_TF(i) = Sector6_TF(i);
                             else
-                                Sector2(i) = Sector8(i);
+                                Sector2_Phase(i) = Sector8_Phase(i);
+                                Sector2_TF(i) = Sector8_TF(i);
                             end
                         else
-                          Sector2(i) = Sector7(i);
+                          Sector2_Phase(i) = Sector7_Phase(i);
+                          Sector2_TF(i) = Sector7_TF(i);
                         end
                  end
              end
       end
-       if Sector3(i) == 0
+       if Sector3_Phase(i) == 0
            if size2 ~=0 || size5 ~=0
              if size2 > size5
-                 Sector3(i) = Sector2(i);
+                 Sector3_Phase(i) = Sector2_Phase(i);
+                 Sector3_TF(i) = Sector2_TF(i);
              else
-                 Sector3(i) = Sector5(i);
+                 Sector3_Phase(i) = Sector5_Phase(i);
+                 Sector3_TF(i) = Sector5_TF(i);
              end
            end
-           if Sector3(i) == 0
+           if Sector3_Phase(i) == 0
                 if size1 ~=0 || size8 ~=0
                     if size1 > size8
-                        Sector3(i) = Sector1(i);
+                        Sector3_Phase(i) = Sector1_Phase(i);
+                        Sector3_TF(i) = Sector1_TF(i);
                     else
-                        Sector3(i) = Sector8(i);
+                        Sector3_Phase(i) = Sector8_Phase(i);
+                        Sector3_TF(i) = Sector8_TF(i);
                     end
                 end
            end
-                if Sector3(i) == 0
+                if Sector3_Phase(i) == 0
                     if size4 ~=0 || size7 ~=0
                         if size4 > size7 
-                            Sector3(i) = Sector4(i);
+                            Sector3_Phase(i) = Sector4_Phase(i);
+                            Sector3_TF(i) = Sector4_TF(i);
                         else
-                            Sector3(i) = Sector7(i);
+                            Sector3_Phase(i) = Sector7_Phase(i);
+                            Sector3_TF(i) = Sector7_TF(i);
                         end
                     else
-                       Sector3(i) = Sector6(i);
+                       Sector3_Phase(i) = Sector6_Phase(i);
+                       Sector3_TF(i) = Sector6_TF(i);
                     end
                 end
       end
-       if Sector4(i) == 0
+       if Sector4_Phase(i) == 0
            if size6 ~=0 || size1 ~=0
              if size6 > size1
-                 Sector4(i) = Sector6(i);
+                 Sector4_Phase(i) = Sector6_Phase(i);
+                 Sector4_TF(i) = Sector6_TF(i);
              else
-                 Sector4(i) = Sector1(i);
+                 Sector4_Phase(i) = Sector1_Phase(i);
+                 Sector4_TF(i) = Sector1_TF(i);
              end
            end
-             if Sector4(i) == 0
+             if Sector4_Phase(i) == 0
                  if size2 ~=0 || size7 ~=0
                       if size2 > size7 
-                          Sector4(i) = Sector2(i);
+                          Sector4_Phase(i) = Sector2_Phase(i);
+                          Sector4_TF(i) = Sector2_TF(i);
                       else
-                          Sector4(i) = Sector7(i);
+                          Sector4_Phase(i) = Sector7_Phase(i);
+                          Sector4_TF(i) = Sector7_TF(i);
                       end
                  end
              end
-                if Sector4(i) == 0
+                if Sector4_Phase(i) == 0
                     if size3 ~=0 || size8 ~=0
                         if size3 > size8
-                            Sector4(i) = Sector3(i);
+                            Sector4_Phase(i) = Sector3_Phase(i);
+                            Sector4_TF(i) = Sector3_TF(i);
                         else
-                            Sector4(i) = Sector8(i);
+                            Sector4_Phase(i) = Sector8_Phase(i);
+                            Sector4_TF(i) = Sector8_TF(i);
                         end
                     else
-                       Sector4(i) = Sector5(i);
+                       Sector4_Phase(i) = Sector5_Phase(i);
+                       Sector4_TF(i) = Sector5_TF(i);
                     end
                 end
             
         end
-      if Sector5(i) == 0
+      if Sector5_Phase(i) == 0
           if size3 ~=0 || size8 ~=0
              if size3 > size8
-                 Sector5(i) = Sector3(i);
+                 Sector5_Phase(i) = Sector3_Phase(i);
+                 Sector5_TF(i) = Sector3_TF(i);
              else
-                 Sector5(i) = Sector8(i);
+                 Sector5_Phase(i) = Sector8_Phase(i);
+                 Sector5_TF(i) = Sector8_TF(i);
              end
           end
-             if Sector5(i) == 0
+             if Sector5_Phase(i) == 0
                  if size2 ~=0 || size7 ~=0
                       if size2 > size7
-                         Sector5(i) = Sector2(i);
+                         Sector5_Phase(i) = Sector2_Phase(i);
+                         Sector5_TF(i) = Sector2_TF(i);
                       else
-                         Sector5(i) = Sector7(i);
+                         Sector5_Phase(i) = Sector7_Phase(i);
+                         Sector5_TF(i) = Sector7_TF(i);
                       end
                  end
              end
-                if Sector5(i) == 0
+                if Sector5_Phase(i) == 0
                     if size1 ~=0 || size6 ~=0
                          if size1 > size6
-                             Sector5(i) = Sector1(i);
+                             Sector5_Phase(i) = Sector1_Phase(i);
+                             Sector5_TF(i) = Sector1_TF(i);
                          else
-                             Sector5(i) = Sector6(i);
+                             Sector5_Phase(i) = Sector6_Phase(i);
+                             Sector5_TF(i) = Sector6_TF(i);
                          end
                      else
-                       Sector5(i) = Sector4(i);
+                       Sector5_Phase(i) = Sector4_Phase(i);
+                       Sector5_TF(i) = Sector4_TF(i);
                     end
                 end
       end
-       if Sector6(i) == 0
+       if Sector6_Phase(i) == 0
            if size4 ~=0 || size7 ~=0
              if size4 > size7
-                 Sector6(i) = Sector4(i);
+                 Sector6_Phase(i) = Sector4_Phase(i);
+                 Sector6_TF(i) = Sector4_TF(i);
              else
-                 Sector6(i) = Sector7(i);
+                 Sector6_Phase(i) = Sector7_Phase(i);
+                 Sector6_TF(i) = Sector7_TF(i);
              end
            end
-             if Sector6(i) == 0
+             if Sector6_Phase(i) == 0
                  if size1 ~=0 || size8 ~=0
                         if size1 > size8
-                            Sector6(i) = Sector1(i);
+                            Sector6_Phase(i) = Sector1_Phase(i);
+                            Sector6_TF(i) = Sector1_TF(i);
                         else
-                            Sector6(i) = Sector8(i);
+                            Sector6_Phase(i) = Sector8_Phase(i);
+                            Sector6_TF(i) = Sector8_TF(i);
                         end
                  end
              end
-                if Sector6(i) == 0
+                if Sector6_Phase(i) == 0
                     if size2 ~=0 || size5 ~=0
                         if size2 > size5
-                            Sector6(i) = Sector2(i);
+                            Sector6_Phase(i) = Sector2_Phase(i);
+                            Sector6_TF(i) = Sector2_TF(i);
                         else
-                            Sector6(i) = Sector5(i);
+                            Sector6_Phase(i) = Sector5_Phase(i);
+                            Sector6_TF(i) = Sector5_TF(i);
                         end
                     else
-                       Sector6(i) = Sector3(i);
+                       Sector6_Phase(i) = Sector3_Phase(i);
+                       Sector6_TF(i) = Sector3_TF(i);
                     end
                 end
             
        end
-       if Sector7(i) == 0
+       if Sector7_Phase(i) == 0
           if size6 ~=0 || size8 ~=0
              if size6 > size8
-                 Sector7(i) = Sector6(i);
+                 Sector7_Phase(i) = Sector6_Phase(i);
+                 Sector7_TF(i) = Sector6_TF(i);
              else
-                 Sector7(i) = Sector8(i);
+                 Sector7_Phase(i) = Sector8_Phase(i);
+                 Sector7_TF(i) = Sector8_TF(i);
              end
           end
-             if Sector7(i) == 0
+             if Sector7_Phase(i) == 0
                  if size4 ~=0 || size5 ~=0
                      if size4 > size5
-                         Sector7(i) = Sector4(i);
+                         Sector7_Phase(i) = Sector4_Phase(i);
+                         Sector7_TF(i) = Sector4_TF(i);
                      else
-                         Sector7(i) = Sector5(i);
+                         Sector7_Phase(i) = Sector5_Phase(i);
+                         Sector7_TF(i) = Sector5_TF(i);
                      end
                  end
              end
-                if Sector7(i) == 0
+                if Sector7_Phase(i) == 0
                     if size1 ~= 0 || size3 ~=0
                         if size1 > size3
-                             Sector7(i) = Sector1(i);
+                             Sector7_Phase(i) = Sector1_Phase(i);
+                             Sector7_TF(i) = Sector1_TF(i);
                         else
-                            Sector7(i) = Sector3(i);
+                            Sector7_Phase(i) = Sector3_Phase(i);
+                            Sector7_TF(i) = Sector3_TF(i);
                         end
                     else
-                        Sector7(i) = Sector2(i);
+                        Sector7_Phase(i) = Sector2_Phase(i);
+                        Sector7_TF(i) = Sector2_TF(i);
                     end
                 end
             
       end
-      if Sector8(i) == 0
+      if Sector8_Phase(i) == 0
           if size5 ~=0 || size7 ~=0
              if size5 > size7
-                 Sector8(i) = Sector5(i);
+                 Sector8_Phase(i) = Sector5_Phase(i);
+                 Sector8_TF(i) = Sector5_TF(i);
              else
-                 Sector8(i) = Sector7(i);
+                 Sector8_Phase(i) = Sector7_Phase(i);
+                 Sector8_TF(i) = Sector7_TF(i);
              end
           end
-             if Sector8(i) == 0
+             if Sector8_Phase(i) == 0
                  if size3 ~=0 || size6 ~=0
                       if size3 > size6
-                         Sector8(i) = Sector3(i);
+                         Sector8_Phase(i) = Sector3_Phase(i);
+                         Sector8_TF(i) = Sector3_TF(i);
                       else
-                         Sector8(i) = Sector6(i);
+                         Sector8_Phase(i) = Sector6_Phase(i);
+                         Sector8_TF(i) = Sector6_TF(i);
                       end
                  end
              end
-                if Sector8(i) == 0
+                if Sector8_Phase(i) == 0
                    if size2 ~=0 || size4 ~=0
                         if size2 > size4
-                           Sector8(i) = Sector2(i);
+                           Sector8_Phase(i) = Sector2_Phase(i);
+                           Sector8_TF(i) = Sector2_TF(i);
                         else
-                           Sector8(i) = Sector4(i);
+                           Sector8_Phase(i) = Sector4_Phase(i);
+                           Sector8_TF(i) = Sector4_TF(i);
                         end
                    else
-                       Sector8(i) = Sector1(i);
+                       Sector8_Phase(i) = Sector1_Phase(i);
+                       Sector8_TF(i) = Sector1_TF(i);
                    end
                 end
       end
@@ -778,21 +865,32 @@ for q=1:numRAgrains
     FinalRAFile(q,6) = RASchmidFactor(q);                %RA Schmid Factor
     FinalRAFile(q,7) = grainfile(RAgrainLocation(q),grainfilesizeCols+1); %RA Taylor Factor
     FinalRAFile(q,8) = grainfile(RAgrainLocation(q),13); %NumNeighbor
-    FinalRAFile(q,9) = Sector1(q);
-    FinalRAFile(q,10) = Sector2(q);
-    FinalRAFile(q,11) = Sector3(q);
-    FinalRAFile(q,12) = Sector4(q);
-    FinalRAFile(q,13) = Sector5(q);
-    FinalRAFile(q,14) = Sector6(q);
-    FinalRAFile(q,15) = Sector7(q);
-    FinalRAFile(q,16) = Sector8(q);
+    FinalRAFile(q,9) = Sector1_Phase(q);
+    FinalRAFile(q,10) = Sector2_Phase(q);
+    FinalRAFile(q,11) = Sector3_Phase(q);
+    FinalRAFile(q,12) = Sector4_Phase(q);
+    FinalRAFile(q,13) = Sector5_Phase(q);
+    FinalRAFile(q,14) = Sector6_Phase(q);
+    FinalRAFile(q,15) = Sector7_Phase(q);
+    FinalRAFile(q,16) = Sector8_Phase(q);
     FinalRAFile(q,17) = SurroundingFerritePercent(q);
     FinalRAFile(q,18) = SurroundingMartPercent(q);
     FinalRAFile(q,19) = SurroundingRApercent(q);
+    FinalRAFile(q,20) = Sector1_TF(q);
+    FinalRAFile(q,21) = Sector2_TF(q);
+    FinalRAFile(q,22) = Sector3_TF(q);
+    FinalRAFile(q,23) = Sector4_TF(q);
+    FinalRAFile(q,24) = Sector5_TF(q);
+    FinalRAFile(q,25) = Sector6_TF(q);
+    FinalRAFile(q,26) = Sector7_TF(q);
+    FinalRAFile(q,27) = Sector8_TF(q);
     
 end
 
-Headers = {'GrainID', 'Area', 'Diameter', 'GSAR', 'MAO', 'Schmid_Factor','Taylor_Factor', 'Num_Neighbors','Sector_1','Sector_2','Sector_3','Sector_4','Sector_5','Sector_6','Sector_7','Sector_8', 'Surrounding_Ferrite', 'Surrounding_Martensite','Surrounding_RA'};
+Headers = {'GrainID', 'Area', 'Diameter', 'GSAR', 'MAO', 'Schmid_Factor','Taylor_Factor',...
+           'Num_Neighbors','Sector1_Phase','Sector2_Phase','Sector3_Phase','Sector4_Phase','Sector5_Phase','Sector6_Phase',...
+           'Sector7_Phase','Sector8_Phase', 'Surrounding_Ferrite', 'Surrounding_Martensite','Surrounding_RA',...
+           'Sector1_TF','Sector2_TF','Sector3_TF','Sector4_TF','Sector5_TF','Sector6_TF','Sector7_TF','Sector8_TF'};
 
 %Create a table with the FinalRAFile info that has headers to describe
 %column data.
