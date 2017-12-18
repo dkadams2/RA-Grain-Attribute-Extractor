@@ -161,7 +161,7 @@ for n=1:length(RANumNeighbor)
         %the number of neighbors the RA grain has.
         for p=1:RANumNeighbor(n)
             %Build a matrix to hold the ID values of the neighboring
-            %grains. 12 is the last column number, it hold the TF values,
+            %grains. 12 is the last column number, it holds the TF values,
             %and 13 on hold the neighbor ID values.
             RANeighborID(n,p) = RAGrainFileCustom(n,12+p);
             
@@ -226,9 +226,34 @@ for n=1:length(RANumNeighbor)
        end
     end
 end
+
+%% Calculate the average TF of the neighboring grains and subtract it from the RA TF (Knezevik paper)
+[RANeighborGrainArea_Row, RANeighborGrainArea_Col] = size(RANeighborGrainArea);
+
+RANeighborAreaSum = zeros(RANeighborGrainArea_Row,1);
+RANeighborTFsumtotal = zeros(RANeighborGrainArea_Row,1);
+for i=1:size(RAGrainFileCustom)
+    for j=1:RANeighborGrainArea_Col
+        RANeighborTFSum(i,j) = RANeighborTF(i,j)*RANeighborGrainArea(i,j);
+        RANeighborAreaSum(i) = RANeighborGrainArea(i,j)+RANeighborAreaSum(i);
+        RANeighborTFsumtotal(i) = RANeighborTFSum(i,j)+RANeighborTFsumtotal(i);
+    end
+    
+    RANeighborTFAverage(i) = RANeighborTFsumtotal(i)/RANeighborAreaSum(i);
+    deltaTF(i) = RANeighborTFAverage(i)-RAGrainFileCustom(i,12);
+    
+end
+xaxis = 1:size(RAGrainFileCustom);
+scatter(xaxis,deltaTF);
+xlabel('RA Grain #');
+ylabel('Delta M (Mbar-M)');
+
+
+
+
 %% Neighbor Grain Sorter and Size Determiner/Locator
 
-[RANeighborGrainArea_Row, RANeighborGrainArea_Col] = size(RANeighborGrainArea);
+
 
 %Use the sort function to arrange the areas in descending order of size.
 RANeighborGrainArea = sort(RANeighborGrainArea,2,'descend');
@@ -884,13 +909,16 @@ for q=1:numRAgrains
     FinalRAFile(q,25) = Sector6_TF(q);
     FinalRAFile(q,26) = Sector7_TF(q);
     FinalRAFile(q,27) = Sector8_TF(q);
+    FinalRAFile(q,28) = RANeighborTFAverage(q);
+    FinalRAFile(q,29) = deltaTF(q);
     
 end
 
 Headers = {'GrainID', 'Area', 'Diameter', 'GSAR', 'MAO', 'Schmid_Factor','Taylor_Factor',...
            'Num_Neighbors','Sector1_Phase','Sector2_Phase','Sector3_Phase','Sector4_Phase','Sector5_Phase','Sector6_Phase',...
            'Sector7_Phase','Sector8_Phase', 'Surrounding_Ferrite', 'Surrounding_Martensite','Surrounding_RA',...
-           'Sector1_TF','Sector2_TF','Sector3_TF','Sector4_TF','Sector5_TF','Sector6_TF','Sector7_TF','Sector8_TF'};
+           'Sector1_TF','Sector2_TF','Sector3_TF','Sector4_TF','Sector5_TF','Sector6_TF','Sector7_TF','Sector8_TF',...
+           'Neighbor_Weighted_Average_TF','TF_Neighbors_Grain_Diff'};
 
 %Create a table with the FinalRAFile info that has headers to describe
 %column data.
