@@ -253,8 +253,6 @@ ylabel('Delta M (Mbar-M)');
 
 %% Neighbor Grain Sorter and Size Determiner/Locator
 
-
-
 %Use the sort function to arrange the areas in descending order of size.
 RANeighborGrainArea = sort(RANeighborGrainArea,2,'descend');
 
@@ -879,6 +877,61 @@ for i=1:RANeighborGrainArea_Row
       end
               
 end
+
+%% Add Strain Data from DIC
+%load the strain data for the strain being analyzed
+strain_grain_file1 = uigetfile({'*.txt'}, 'Select Strain File of Grain Type 1');
+grain_file1_strain = dlmread(strain_grain_file1);
+point_strains = grain_file1_strain(:,11);
+point_ID = grain_file1_strain(:,9);
+point_X = grain_file1_strain(:,4);
+point_Y = grain_file1_strain(:,5);
+
+
+%Just get average strain in RA grain for now
+for i = 1:numRAgrains
+    strain_total = 0;
+    num_strain_points = 0;
+    for j = 1:size(point_strains)
+        if point_ID(j) == RAGrainFileALL(i)
+            strain_total = strain_total+point_strains(j);
+            num_strain_points = num_strain_points +1;
+        end
+    end
+    RAGrainStrainAve(i) = strain_total/num_strain_points;
+end
+
+%Get average strain of neighbors around the RA grain
+Neighbor_strain_total = 0;
+strain_count = 0;
+for i = 1:numRAgrains
+      Neighbor_strain_total = 0;
+       strain_count = 0;
+    if RANumNeighbor(i) ~= 0 
+    for j = 1:RANumNeighbor(i)
+        for k=1:size(point_strains)
+                if RANeighborID(i,j) == grain_file1_strain(k,9)
+                   Neighbor_strain_total = grain_file1_strain(k,11) + Neighbor_strain_total;
+                   strain_count = strain_count+1;
+                end
+        end
+    end
+        RANeighborStrainAve(i) = Neighbor_strain_total/strain_count;
+      
+    else
+        RANeighborStrainAve(i) = 0;
+    end
+end
+
+figure(8)
+scatter(1:i,RAGrainStrainAve)
+hold on
+scatter(1:i,RANeighborStrainAve)
+title('RA DIC Strain Averages')
+xlabel('RA Grain')
+ylabel('Strain')
+legend('RA Grain Average Strain','Surrounding Neighbor Strain Average')
+        
 %% Final RA File Creation
 
 for q=1:numRAgrains
