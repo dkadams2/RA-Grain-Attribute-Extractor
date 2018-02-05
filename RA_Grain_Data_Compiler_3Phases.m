@@ -979,6 +979,31 @@ title('RA DIC Normalized Strain Averages')
 xlabel('RA Grain')
 ylabel('Strain')
 legend('RA Grain Normalized Average Strain','Surrounding Neighbor Normalized Strain Average')
+%% Calculate the average GND Content in the RA grains
+% Load the GND file 
+GND_file = uigetfile({'*.txt'}, 'Select GND File');
+GND_mat = dlmread(GND_file);
+GND_x_point = GND_mat(:,1);
+GND_y_point = GND_mat(:,2);
+GND_value = GND_mat(:,4);
+
+%Add grain ID onto the GND file
+for i=1:size(GND_mat)
+    GND_mat(i,5) = point_ID(i);
+end
+
+%Get the average GND content in the RA grains
+for i = 1:numRAgrains
+    GND_total = 0;
+    num_GND_points = 0;
+    for j = 1:size(GND_mat)
+        if GND_mat(j,5) == RAGrainFileALL(i)
+            GND_total = GND_total+GND_value(j);
+            num_GND_points = num_GND_points + 1;
+        end
+    end
+    RAGrainGNDAve(i) = GND_total/num_GND_points;
+end
 
         
 %% Final RA File Creation
