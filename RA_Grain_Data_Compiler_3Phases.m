@@ -887,8 +887,48 @@ point_ID = grain_file1_strain(:,9);
 point_X = grain_file1_strain(:,4);
 point_Y = grain_file1_strain(:,5);
 
+norm_point_strains = grain_file1_strain(:,12);
 
-%Just get average strain in RA grain for now
+%Get the average normalized strain for an RA grain and its neihbors to see
+%which RA grains have higher localized strain. This theoretically should
+%alleviate the issue of having to use absolute strain values which vary
+%from one scan to the next
+
+%Get the average normalized strain in the RA grains
+for i = 1:numRAgrains
+    norm_strain_total = 0;
+    num_strain_points = 0;
+    for j = 1:size(norm_point_strains)
+        if point_ID(j) == RAGrainFileALL(i)
+            norm_strain_total = norm_strain_total+norm_point_strains(j);
+            num_strain_points = num_strain_points + 1;
+        end
+    end
+    RAGrainNormalizedStrainAve(i) = norm_strain_total/num_strain_points;
+end
+
+%Get normalized average strain of neighbors around the RA grain
+Neighbor_norm_strain_total = 0;
+strain_count = 0;
+for i = 1:numRAgrains
+       Neighbor_norm_strain_total = 0;
+       strain_count = 0;
+    if RANumNeighbor(i) ~= 0 
+    for j = 1:RANumNeighbor(i)
+        for k=1:size(norm_point_strains)
+                if RANeighborID(i,j) == grain_file1_strain(k,9)
+                   Neighbor_norm_strain_total = grain_file1_strain(k,12) + Neighbor_norm_strain_total;
+                   strain_count = strain_count+1;
+                end
+        end
+    end
+        RANeighborNormalizedStrainAve(i) = Neighbor_norm_strain_total/strain_count;
+    else
+        RANeighborNormalizedStrainAve(i) = 0;
+    end
+end
+
+%Just get average absolute strain in RA grain for now
 for i = 1:numRAgrains
     strain_total = 0;
     num_strain_points = 0;
@@ -901,7 +941,7 @@ for i = 1:numRAgrains
     RAGrainStrainAve(i) = strain_total/num_strain_points;
 end
 
-%Get average strain of neighbors around the RA grain
+%Get average absolute strain of neighbors around the RA grain
 Neighbor_strain_total = 0;
 strain_count = 0;
 for i = 1:numRAgrains
@@ -916,8 +956,7 @@ for i = 1:numRAgrains
                 end
         end
     end
-        RANeighborStrainAve(i) = Neighbor_strain_total/strain_count;
-      
+        RANeighborStrainAve(i) = Neighbor_strain_total/strain_count;     
     else
         RANeighborStrainAve(i) = 0;
     end
@@ -931,6 +970,16 @@ title('RA DIC Strain Averages')
 xlabel('RA Grain')
 ylabel('Strain')
 legend('RA Grain Average Strain','Surrounding Neighbor Strain Average')
+
+figure(9)
+scatter(1:i,RAGrainNormalizedStrainAve)
+hold on
+scatter(1:i,RANeighborNormalizedStrainAve)
+title('RA DIC Normalized Strain Averages')
+xlabel('RA Grain')
+ylabel('Strain')
+legend('RA Grain Normalized Average Strain','Surrounding Neighbor Normalized Strain Average')
+
         
 %% Final RA File Creation
 
